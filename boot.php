@@ -17,11 +17,22 @@ Route::middleware(['web', 'auth', 'admin'])->group(function () {
             'cat_dir', 'f_cat', 'directory', 'users', 'messages', 'report',
             'banner', 'link', 'notif', 'visits'
         ];
+
+        $errors = [];
+        
+        // 1. Convert Database to utf8mb4
+        try {
+            $dbName = DB::getDatabaseName();
+            DB::statement("ALTER DATABASE `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        } catch (\Exception $e) {
+            $errors[] = "DB Alter Error: " . $e->getMessage();
+        }
         
         $excludeColumns = [
-            'email', 'password', 'remember_token', 'avatar', 'cover', 
+            'password', 'email', 'remember_token', 'avatar', 'cover', 
             'url', 'slug', 'token', 'ip', 'ip_address', 'file', 'image', 'icon',
-            'created_at', 'updated_at', 'email_verified_at', 'date', 'link'
+            'created_at', 'updated_at', 'email_verified_at', 'date', 'link',
+            'o_type'
         ];
         
         $fixedCount = 0;
@@ -38,38 +49,62 @@ Route::middleware(['web', 'auth', 'admin'])->group(function () {
                 foreach ($allColumns as $col) {
                     if (in_array(strtolower($col), $excludeColumns)) continue;
                     
-                    $val = $row->$col;
-                    if (is_string($val) && !empty($val)) {
-                        // Check for Mojibake characters common in double-encoded Arabic (Latin1 reading UTF-8)
-                        if (preg_match('/[ØÙ]/', $val)) {
-                            // Convert back from Latin-1 reading to actual UTF-8
-                            $fixed = @mb_convert_encoding($val, 'ISO-8859-1', 'UTF-8');
-                            
-                            // Ensure the result is valid
-                            if ($fixed && mb_check_encoding($fixed, 'UTF-8')) {
-                                $updates[$col] = $fixed;
-                                $fixedFields++;
+                        $val = $row->$col;
+                        if (is_string($val) && !empty($val)) {
+                            // Convert column to utf8mb4 just in time if we find Arabic
+                            if (preg_match('/[ØÙ]/', $val)) {
+                                try {
+                                    DB::statement("ALTER TABLE `$table` MODIFY `$col` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                                } catch (\Exception $ex) {
+                                    try {
+                                        DB::statement("ALTER TABLE `$table` MODIFY `$col` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                                    } catch (\Exception $ex2) {
+                                        $errors[] = "Col Alter ($table.$col): " . $ex2->getMessage();
+                                    }
+                                }
+                                
+                                $fixed = @mb_convert_encoding($val, 'ISO-8859-1', 'UTF-8');
+                                if ($fixed && mb_check_encoding($fixed, 'UTF-8')) {
+                                    $updates[$col] = $fixed;
+                                    $fixedFields++;
+                                }
                             }
                         }
                     }
-                }
-                
-                if (!empty($updates)) {
+                    
+                    if (!empty($updates)) {
                     if (isset($row->id)) {
-                        DB::table($table)->where('id', $row->id)->update($updates);
-                        $fixedCount++;
+                        try {
+                            DB::table($table)->where('id', $row->id)->update($updates);
+                            $fixedCount++;
+                        } catch (\Exception $ex) {
+                            $errors[] = "Update Error ($table ID {$row->id}): " . $ex->getMessage();
+                        }
                     } else if (isset($row->name) && $table === 'options') {
-                        DB::table($table)->where('name', $row->name)->update($updates);
-                        $fixedCount++;
+                        try {
+                            DB::table($table)->where('name', $row->name)->update($updates);
+                            $fixedCount++;
+                        } catch (\Exception $ex) {
+                            $errors[] = "Update Error (options {$row->name}): " . $ex->getMessage();
+                        }
                     } else if ($table === 'setting') {
-                        DB::table($table)->update($updates);
-                        $fixedCount++;
+                        try {
+                            DB::table($table)->update($updates);
+                            $fixedCount++;
+                        } catch (\Exception $ex) {
+                            $errors[] = "Update Error ($table): " . $ex->getMessage();
+                        }
                     }
                 }
             }
         }
         
-        return back()->with('success', "تم إصلاح $fixedFields حقل عبر $fixedCount سجل في قاعدة البيانات بنجاح.");
+        $msg = "تم إصلاح $fixedFields حقل عبر $fixedCount سجل في قاعدة البيانات بنجاح.";
+        if (count($errors) > 0) {
+            $msg .= "\nيوجد أخطاء: " . implode(" | ", array_slice($errors, 0, 3));
+        }
+        
+        return back()->with('success', $msg);
     })->name('admin.arabic-fixer.run');
 });
 
