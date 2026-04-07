@@ -1,10 +1,13 @@
 {
     "name": "Arabic Encoding Fixer",
     "slug": "arabic-fixer",
-    "version": "2.0",
+    "version": "2.2",
     "author": "MrGhozzi",
-    "description": "Fixes Arabic text mojibake inherited from v3.2.0 latin1 databases. Go to /admin/arabic-fixer to run the fix.",
+    "author_url": "https://github.com/mrghozzi",
+    "description": "Fixes Arabic text mojibake inherited from v3.x.x latin1 databases. Go to /admin/arabic-fixer to run the fix.",
     "thumbnail": "thumbnail.png",
     "latest": "https://github.com/mrghozzi/arabic-fixer/releases/latest",
-    "min_myads": "4.2.3"
+    "siteweb": "https://github.com/mrghozzi/arabic-fixer",
+    "min_myads": "4.2.4",
+    "ADStn_url": "arabic-fixer"
 }

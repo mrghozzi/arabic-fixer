@@ -22,7 +22,7 @@ final class ArabicFixerService
         'status' => ['label' => 'منشورات المجتمع', 'pk' => 'id'],
         'forum' => ['label' => 'مواضيع المنتدى', 'pk' => 'id'],
         'f_cat' => ['label' => 'أقسام المنتدى', 'pk' => 'id'],
-        'f_coment' => ['label' => 'تعليقات المنتدى', 'pk' => 'id'],
+        'f_comment' => ['label' => 'تعليقات المنتدى', 'pk' => 'id'],
         'users' => ['label' => 'الأعضاء', 'pk' => 'id'],
         'messages' => ['label' => 'الرسائل الخاصة', 'pk' => 'id_msg'],
         'notif' => ['label' => 'الإشعارات', 'pk' => 'id'],
@@ -44,7 +44,7 @@ final class ArabicFixerService
             'description' => 'يفحص كل الجداول المتاحة التي تعرفها الإضافة.',
             'icon' => 'fa-solid fa-layer-group',
             'tables' => [
-                'setting', 'options', 'menu', 'pages', 'status', 'forum', 'f_cat', 'f_coment',
+                'setting', 'options', 'menu', 'pages', 'status', 'forum', 'f_cat', 'f_comment',
                 'users', 'messages', 'notif', 'report', 'ads', 'banner', 'link', 'smart_ads',
                 'visits', 'directory', 'cat_dir', 'news', 'order_requests',
             ],
@@ -59,7 +59,7 @@ final class ArabicFixerService
             'label' => 'المجتمع والمنتدى',
             'description' => 'المنشورات، المنتدى، الأقسام، التعليقات، والبلاغات.',
             'icon' => 'fa-solid fa-users',
-            'tables' => ['status', 'forum', 'f_cat', 'f_coment', 'report'],
+            'tables' => ['status', 'forum', 'f_cat', 'f_comment', 'report'],
         ],
         'members' => [
             'label' => 'الرسائل والإشعارات والأعضاء',
@@ -93,7 +93,7 @@ final class ArabicFixerService
         'ended_at', 'revoked_at', 'date', 'time', 'last_activity',
     ];
 
-    private const TEXTUAL_TYPES = ['char', 'enum', 'json', 'longtext', 'mediumtext', 'string', 'text'];
+    private const TEXTUAL_TYPES = ['char', 'enum', 'json', 'longtext', 'mediumtext', 'string', 'text', 'varchar', 'tinytext'];
 
     private ?array $catalogCache = null;
 

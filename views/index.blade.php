@@ -1,4 +1,4 @@
-@extends('theme::layouts.admin')
+@extends('admin::layouts.admin')
 
 @section('title', 'إصلاح النصوص العربية')
 @section('admin_shell_header_mode', 'hidden')
