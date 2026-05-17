@@ -1,5 +1,10 @@
 # Arabic Encoding Fixer - Changelog
 
+## v2.3
+* **Feature**: Added support for correcting Arabic mojibake encoding in the Service Marketplace requests table (`order_requests`).
+* **Compatibility**: Upgraded compatibility layer to Laravel 12 and MYADS v4.3.3 system requirements.
+* **Improvement**: Handled PHP 8.2+ string repair edge-cases on legacy database fields smoothly.
+
 ## v2.2
 * **Fix**: Expanded supported database column types to include `varchar` and `tinytext`.
 * **Improvement**: Enabled fixing of titles, names, and short text fields across all supported tables, including:

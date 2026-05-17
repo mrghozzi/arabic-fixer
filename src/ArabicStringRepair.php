@@ -12,7 +12,17 @@ final class ArabicStringRepair
             return false;
         }
 
-        return (bool) preg_match('/[\x{00D8}\x{00D9}][\x{0080}-\x{00BF}]/u', $value);
+        // Single-layer mojibake
+        if (preg_match('/[\x{00D8}\x{00D9}][\x{0080}-\x{00BF}]/u', $value)) {
+            return true;
+        }
+
+        // Multi-layer mojibake (containing double UTF-8 encoded D8/D9 bytes)
+        if (str_contains($value, 'Ã˜') || str_contains($value, 'Ã™')) {
+            return true;
+        }
+
+        return false;
     }
 
     public static function fix(?string $value): ?string
